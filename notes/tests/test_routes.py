@@ -1,9 +1,7 @@
-from http import HTTPStatus
-
 from django.contrib.auth import get_user_model
-
 from django.test import Client, TestCase
 from django.urls import reverse
+from http import HTTPStatus
 
 from notes.models import Note
 
@@ -12,25 +10,23 @@ User = get_user_model()
 
 
 class TestRoutes(TestCase):
-    # сценарии для анонимных пользователей поиск по яндексу
-    # типо проверка если удалать классметод то проверяем страницы на доспуность не залогиненого пользователя
+
     @classmethod
     def setUpTestData(cls):
-        # Создаём пользователя.
+        # Создаём пользователей.
         cls.author = User.objects.create(username='testUser')
         cls.reader = User.objects.create(username='testReader')
+        cls.user_client = Client()
         # создаём заметку
         cls.note = Note.objects.create(
             title='testtitle',
             text='testtext',
             slug='testslug',
             author=cls.author)
-        cls.user_client = Client()
-
 
     def test_pages_availability_for_anonymous_user(self):
         """
-        тестирование страниц для доступа
+        Тестирование страниц для анонимных пользователей
         """
         urls = (
             'notes:home',
@@ -45,6 +41,9 @@ class TestRoutes(TestCase):
                 self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_pages_availability_for_auth_user(self):
+        """
+        Тестирование страниц для авторезированных пользователей
+        """
         urls = (
             'notes:list',
             'notes:add',
@@ -59,6 +58,11 @@ class TestRoutes(TestCase):
                 self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_pages_availability_for_different_users(self):
+        """
+        Тестирование редактирования страниц
+        для авторезированных пользователей,
+        которые не авторы заметок
+        """
         urls = (
             'notes:detail',
             'notes:edit',
@@ -71,41 +75,12 @@ class TestRoutes(TestCase):
                 response = self.client.get(url)
                 self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
 
-    def test_availability_for_notes_crud(self):
-        """
-            Проверка на удаление, добавление,просмотр и редактирвоание заметки
-        """
-        users_statuses = (
-            (self.author, HTTPStatus.OK),
-            (self.reader, HTTPStatus.FOUND),
-            (self.user_client, HTTPStatus.FOUND),
-        )
-        url_list = (('notes:edit', (self.note.slug,)),
-                    ('notes:delete', (self.note.slug,)),
-                    ('notes:detail', (self.note.slug,)),
-                    ('notes:add', None),
-                    ('notes:list', None),
-                    ('notes:success', None),
-                    )
-        for user, status in users_statuses:
-            if status == HTTPStatus.OK:
-                self.client.force_login(user)
-            for name, slug in url_list:
-                with self.subTest(user=user, name=name):
-                    # if slug is not None:
-                    url = reverse(name, args=slug)
-                    # else:
-                    # url = reverse(name)
-                    response = self.client.get(url)
-                    # print(url)
-                    # print(response.status_code, status, ' thiiiiis')
-                    self.assertEqual(response.status_code, status)
-                # self.client.logout(user)
-            self.client.logout()
-
     def test_redirect_for_anonymous_client(self):
 
-        # Сохраняем адрес страницы логина:
+        """
+        Тестирование редиректа для авторезированных
+        и не авторезирвоанных пользователей
+        """
 
         url_list = (('notes:edit', (self.note.slug,)),
                     ('notes:delete', (self.note.slug,)),
