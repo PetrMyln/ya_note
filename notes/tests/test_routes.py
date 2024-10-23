@@ -5,7 +5,7 @@ from http import HTTPStatus
 
 from notes.models import Note
 
-# Получаем модель пользователя.
+
 User = get_user_model()
 
 
