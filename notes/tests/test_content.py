@@ -9,7 +9,7 @@ from notes.models import Note
 User = get_user_model()
 
 
-class TestHomePage(TestCase):
+class eTestHomePage(TestCase):
     NOTES_LIST_URL = reverse('notes:list')
 
     @classmethod
@@ -17,8 +17,8 @@ class TestHomePage(TestCase):
         # Вычисляем текущую дату.
 
         cls.author = User.objects.create(username='testUser')
-        #cls.client.force_login(cls.author)
-        #print(cls.author.id)
+        # cls.client.force_login(cls.author)
+        # print(cls.author.id)
         all_notes = [
             Note(
                 title=f'Заметка {index}',
@@ -28,7 +28,7 @@ class TestHomePage(TestCase):
                 slug=index,
                 author=cls.author
             )
-            for index in range(1,21)
+            for index in range(1, 21)
         ]
         Note.objects.bulk_create(all_notes)
 
@@ -51,12 +51,13 @@ class TestHomePage(TestCase):
         all_notes = [note.pk for note in object_list]
         # Сортируем полученный список по убыванию.
         sorted_dates = sorted(all_notes)
-        #print(all_notes)
-        #print(sorted_dates)
+        # print(all_notes)
+        # print(sorted_dates)
         # Проверяем, что исходный список был отсортирован правильно.
         self.assertEqual(all_notes, sorted_dates)
 
-class TestDetailPage(TestCase):
+
+class eTestDetailPage(TestCase):
 
     @classmethod
     def setUpTestData(cls):
@@ -71,7 +72,50 @@ class TestDetailPage(TestCase):
         cls.detail_url = reverse(
             'notes:edit', args=(cls.note.slug,))
         print(cls.detail_url)
-    def del_test_anonymous_client_has_no_form(self):
 
+    def del_test_anonymous_client_has_no_form(self):
         response = self.client.get(self.detail_url)
         self.assertNotIn('form', response.context)
+
+
+class TestNotesInList(TestCase):
+    NOTES_LIST_URL = reverse('notes:list')
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.author_one = User.objects.create(username='testUser1')
+        cls.author_two = User.objects.create(username='testUser2')
+        cls.note_one = Note.objects.create(
+            title='Тестовая новость',
+            text='Просто текст.',
+            slug='test',
+            author=cls.author_one
+        )
+
+
+    def test_notes_in_list(self):
+        self.client.force_login(self.author_one)
+        response = self.client.get(self.NOTES_LIST_URL)
+        object_list = response.context['object_list']
+        assert self.note_one in object_list
+
+
+
+    def test_notes_not_in_another_user_list(self):
+        self.client.force_login(self.author_two)
+        response = self.client.get(self.NOTES_LIST_URL)
+        object_list = response.context['object_list']
+        assert self.note_one not in object_list
+
+
+    def test_notes_list_for_different_users(self):
+        users_and_rule_for_note = (
+            (self.author_one, True),
+            (self.author_two, False),
+        )
+        for user, rule in users_and_rule_for_note:
+            self.client.force_login(user)
+            response = self.client.get(self.NOTES_LIST_URL)
+            object_list = response.context['object_list']
+            assert (self.note_one in object_list) is rule
+            self.client.logout()
