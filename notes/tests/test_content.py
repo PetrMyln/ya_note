@@ -4,6 +4,8 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 from datetime import datetime, timedelta
+
+from notes.forms import NoteForm
 from notes.models import Note
 
 User = get_user_model()
@@ -92,7 +94,6 @@ class TestNotesInList(TestCase):
             author=cls.author_one
         )
 
-
     def test_notes_list_for_different_users(self):
         users_and_rule_for_note = (
             (self.author_one, True),
@@ -106,4 +107,14 @@ class TestNotesInList(TestCase):
             self.client.logout()
 
     def test_pages_contains_form(self):
-        pass
+        urls_and_slug = (
+            ('notes:add', None),
+            ('notes:edit', (self.note_one.slug,)),
+        )
+        self.client.force_login(self.author_one)
+        for name, slug in urls_and_slug:
+            with self.subTest(name=name):
+                url = reverse(name, args=slug)
+                response = self.client.get(url)
+                assert 'form' in response.context
+                assert isinstance(response.context['form'], NoteForm)

@@ -38,11 +38,7 @@ def test_notes_list_for_different_users(
     )
 )
 def test_pages_contains_form(author_client, name, args):
-    # Формируем URL.
     url = reverse(name, args=args)
-    # Запрашиваем нужную страницу:
     response = author_client.get(url)
-    # Проверяем, есть ли объект формы в словаре контекста:
     assert 'form' in response.context
-    # Проверяем, что объект формы относится к нужному классу.
     assert isinstance(response.context['form'], NoteForm)
