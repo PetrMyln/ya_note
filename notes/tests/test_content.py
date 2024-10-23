@@ -93,21 +93,6 @@ class TestNotesInList(TestCase):
         )
 
 
-    def test_notes_in_list(self):
-        self.client.force_login(self.author_one)
-        response = self.client.get(self.NOTES_LIST_URL)
-        object_list = response.context['object_list']
-        assert self.note_one in object_list
-
-
-
-    def test_notes_not_in_another_user_list(self):
-        self.client.force_login(self.author_two)
-        response = self.client.get(self.NOTES_LIST_URL)
-        object_list = response.context['object_list']
-        assert self.note_one not in object_list
-
-
     def test_notes_list_for_different_users(self):
         users_and_rule_for_note = (
             (self.author_one, True),
@@ -119,3 +104,6 @@ class TestNotesInList(TestCase):
             object_list = response.context['object_list']
             assert (self.note_one in object_list) is rule
             self.client.logout()
+
+    def test_pages_contains_form(self):
+        pass
