@@ -11,6 +11,14 @@ from notes.tests.conftest import (
 
 
 class TestLogicToCreateNote(TestCase):
+    """
+    Проверака на :
+    -Залогиненный пользователь может создать заметку, а
+    анонимный — не может.
+    -Невозможно создать две заметки с одинаковым slug.
+    -Если при создании заметки не заполнен slug,
+    то он формируется автоматически.
+    """
 
     @classmethod
     def setUpTestData(cls):
@@ -21,6 +29,7 @@ class TestLogicToCreateNote(TestCase):
         cls.author_client.force_login(cls.author)
 
     def test_user_can_create_note(self):
+
         response = self.url_and_response(
             'notes:add',
             self.author_client,
@@ -68,6 +77,13 @@ class TestLogicToCreateNote(TestCase):
 
 
 class TestLogicEditSlug(TestCase):
+    """
+    Тест
+    -Если при создании заметки не заполнен slug,
+    то он формируется автоматически.
+    -Пользователь может редактировать и удалять свои заметки,
+     но не может редактировать или удалять чужие.
+    """
 
     @classmethod
     def setUpTestData(cls):

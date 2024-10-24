@@ -8,6 +8,11 @@ from notes.models import Note
 
 
 def test_user_can_create_note(author_client, author, form_data):
+    """
+    Тест
+    Залогиненный пользователь может создать заметку,
+    а анонимный — не может.
+    """
     url = reverse('notes:add')
     response = author_client.post(url, data=form_data)
     assertRedirects(response, reverse('notes:success'))
@@ -21,6 +26,10 @@ def test_user_can_create_note(author_client, author, form_data):
 
 @pytest.mark.django_db
 def test_anonymous_user_cant_create_note(client, form_data):
+    """
+    Тест
+    Не Залогиненный пользователь не может создать заметку
+    """
     url = reverse('notes:add')
     response = client.post(url, data=form_data)
     login_url = reverse('users:login')
@@ -30,6 +39,10 @@ def test_anonymous_user_cant_create_note(client, form_data):
 
 
 def test_empty_slug(author_client, form_data):
+    """
+    Если при создании заметки не заполнен slug,
+     то он формируется автоматически.
+    """
     url = reverse('notes:add')
     form_data.pop('slug')
     response = author_client.post(url, data=form_data)
@@ -41,6 +54,9 @@ def test_empty_slug(author_client, form_data):
 
 
 def test_author_can_edit_note(author_client, form_data, note):
+    """
+    Пользователь может редактировать свои заметки
+    """
     url = reverse('notes:edit', args=(note.slug,))
     response = author_client.post(url, form_data)
     assertRedirects(response, reverse('notes:success'))
@@ -49,7 +65,11 @@ def test_author_can_edit_note(author_client, form_data, note):
     assert note.text == form_data['text']
     assert note.slug == form_data['slug']
 
+
 def test_other_user_cant_edit_note(not_author_client, form_data, note):
+    """
+    Пользователь не может редактировать и удалять чужие заметки
+    """
     url = reverse('notes:edit', args=(note.slug,))
     response = not_author_client.post(url, form_data)
     assert response.status_code == HTTPStatus.NOT_FOUND
@@ -60,6 +80,9 @@ def test_other_user_cant_edit_note(not_author_client, form_data, note):
 
 
 def test_author_can_delete_note(author_client, slug_for_args):
+    """
+    Пользователь может удалять свои заметки
+    """
     url = reverse('notes:delete', args=slug_for_args)
     response = author_client.post(url)
     assertRedirects(response, reverse('notes:success'))
@@ -67,7 +90,11 @@ def test_author_can_delete_note(author_client, slug_for_args):
 
 
 def test_other_user_cant_delete_note(not_author_client, slug_for_args):
+    """
+    Пользователь не может удалять свои заметки
+    """
     url = reverse('notes:delete', args=slug_for_args)
     response = not_author_client.post(url)
     assert response.status_code == HTTPStatus.NOT_FOUND
     assert Note.objects.count() == 1
+
