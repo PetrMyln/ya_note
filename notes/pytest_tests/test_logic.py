@@ -97,4 +97,3 @@ def test_other_user_cant_delete_note(not_author_client, slug_for_args):
     response = not_author_client.post(url)
     assert response.status_code == HTTPStatus.NOT_FOUND
     assert Note.objects.count() == 1
-
