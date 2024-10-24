@@ -3,15 +3,15 @@ import pytest
 from django.urls import reverse
 
 from notes.forms import NoteForm
-
+from pytest_lazyfixture import lazy_fixture
 
 @pytest.mark.parametrize(
     # Задаём названия для параметров:
     'parametrized_client, note_in_list',
     (
         # Передаём фикстуры в параметры при помощи "ленивых фикстур":
-        (pytest.lazy_fixture('author_client'), True),
-        (pytest.lazy_fixture('not_author_client'), False),
+        (lazy_fixture('author_client'), True),
+        (lazy_fixture('not_author_client'), False),
     )
 )
 def test_notes_list_for_different_users(
@@ -34,7 +34,7 @@ def test_notes_list_for_different_users(
         # никакие дополнительные аргументы для reverse() не нужны.
         ('notes:add', None),
         # Для тестирования страницы редактирования заметки нужен slug заметки.
-        ('notes:edit', pytest.lazy_fixture('slug_for_args'))
+        ('notes:edit', lazy_fixture('slug_for_args'))
     )
 )
 def test_pages_contains_form(author_client, name, args):

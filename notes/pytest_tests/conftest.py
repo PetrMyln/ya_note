@@ -1,5 +1,6 @@
 import pytest
 from django.test.client import Client
+from pytest_lazyfixture import lazy_fixture
 
 from notes.models import Note
 

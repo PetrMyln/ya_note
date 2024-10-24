@@ -11,7 +11,7 @@ from notes.models import Note
 User = get_user_model()
 
 
-class eTestHomePage(TestCase):
+class TestHomePage(TestCase):
     NOTES_LIST_URL = reverse('notes:list')
 
     @classmethod
@@ -59,7 +59,7 @@ class eTestHomePage(TestCase):
         self.assertEqual(all_notes, sorted_dates)
 
 
-class eTestDetailPage(TestCase):
+class TestDetailPage(TestCase):
 
     @classmethod
     def setUpTestData(cls):
@@ -73,7 +73,7 @@ class eTestDetailPage(TestCase):
 
         cls.detail_url = reverse(
             'notes:edit', args=(cls.note.slug,))
-        print(cls.detail_url)
+        #print(cls.detail_url)
 
     def del_test_anonymous_client_has_no_form(self):
         response = self.client.get(self.detail_url)
